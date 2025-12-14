@@ -21,7 +21,7 @@ class Slider {
 
     noStroke();
     fill(70);
-    textSize(11);
+    textSize(15);
     textAlign(LEFT, BOTTOM);
     text(this.label, this.x1, this.y - 6);
 
@@ -33,7 +33,10 @@ class Slider {
     stroke(120);
     circle(t, this.y, this.radius * 2);
 
+    //dragging founction == to change color 
     if (mouseIsPressed) {
+
+  
       let over =
         dist(mouseX, mouseY, t, this.y) <= this.radius + 6 ||
         (this.dragging &&
@@ -42,7 +45,7 @@ class Slider {
          mouseX <= this.x2);
 
       this.dragging = over;
-
+        //mousex valute to slider value so it changes rgb value
       if (this.dragging) {
         this.value = map(
           constrain(mouseX, this.x1, this.x2),
@@ -127,7 +130,7 @@ class Scene0 {
   draw() {
     this.display();
   }
-
+//when submit == next screen
   display() {
     if (this.submitted) {
       this.drawTransitionScreen();
@@ -137,6 +140,7 @@ class Scene0 {
     background(235);
 
     if (this.video) {
+      //mirror camera
       push();
       translate(width, 0);
       scale(-1, 1);
@@ -149,8 +153,8 @@ class Scene0 {
       let L = eyes.left;
       let R = eyes.right;
 
-      let distLR = dist(L.x, L.y, R.x, R.y);
-      let radius = constrain(distLR * 0.35, 20, 36);
+    let distLR = dist(L.x, L.y, R.x, R.y);
+    let radius = constrain(distLR * 0.36, 24, 48);
 
       let userCol = this.currentRGB();
 
@@ -159,9 +163,11 @@ class Scene0 {
       this.drawLens(R.x, R.y, radius, userCol);
     } else {
       fill(255);
-      stroke(20);
+      textSize(50)
+      stroke(30);
+      strokeWeight(5);
       textAlign(CENTER, CENTER);
-      text("Show your face", width / 2, 140);
+      text("Show your face", width / 2, 250);
     }
 
     noStroke();
@@ -171,7 +177,7 @@ class Scene0 {
     push();
     fill(60);
     textAlign(CENTER, CENTER);
-    textSize(20);
+    textSize(25);
     text("I should be the one that they like", width / 2, 20);
     pop();
 
@@ -181,14 +187,14 @@ class Scene0 {
     strokeWeight(2);
     stroke(255);
     fill(this.target.r, this.target.g, this.target.b);
-    rect(width - 80, 80, 45, 45, 6);
+    rect(width - 120, 80, 45, 45, 6);
     pop();
 
     push();
     fill(255);
     stroke(20);
     textAlign(RIGHT, TOP);
-    textSize(11);
+    textSize(20);
     text("They are looking for", width - 25, 135);
     pop();
 
@@ -196,7 +202,7 @@ class Scene0 {
     let pass = (d.dr <= this.range &&
                 d.dg <= this.range &&
                 d.db <= this.range);
-
+//helper text location not overlapping with webcam and other 
     let desiredInfoBase = this.videoHeight + 60;
     let baseMin = this.videoHeight + 30;
     let baseMax = height - 200;
@@ -228,7 +234,7 @@ class Scene0 {
       push();
       stroke(255);
       strokeWeight(5);
-      textSize(40);
+      textSize(60);
       if (pass) {
         fill(0,150,0);
         text("Good Taste", statusX, statusY);
@@ -239,27 +245,42 @@ class Scene0 {
       pop();
     }
 
-    push();
-    textSize(12);
-    if (!pass) {
-      fill(120);
-      text("Drag sliders · Press R to reroll color", width / 2, infoTextY);
-      text(
-        "The goal is to get the value for A,B,and C under 20",
-        width / 2,
-        helperTextY
-      );
-    } else {
-      fill(50);
-      textSize(16);
-      text("Press ENTER to submit", width / 2, infoTextY);
-    }
-    pop();
+  push();
+textAlign(CENTER, CENTER);
+textSize(18);
+
+if (!eyes) {
+  // if eye did not show 
+  fill(255);
+  stroke(5);
+  strokeWeight(5);
+  textSize(40)
+  text("Let's start some color matching", width / 2, infoTextY);
+
+} else if (!pass) {
+  // if eye show but color dont match
+  fill(120);
+  text("Drag sliders · Press R to reroll color", width / 2, infoTextY);
+  text(
+    "The goal is to get the value for A,B,and C under 20",
+    width / 2,
+    helperTextY
+  );
+
+} else {
+  // matched for color
+  fill(50);
+  textSize(20);
+  text("Press ENTER to submit", width / 2, infoTextY);
+}
+
+pop();
+
 
   noCursor();
   push();
-  imageMode(CENTER);
-  image(cursorImg, mouseX, mouseY, 60, 60);
+  imageMode(CORNER);
+  image(cursorImg, mouseX, mouseY-70, 100, 100);
   pop();
 
   }
@@ -291,7 +312,7 @@ class Scene0 {
     textSize(26);
     text("Press 1 to enter the dating world", width / 2, height / 2);
   }
-
+//clm indicate eye posiiton
   getEyeCentersCLM() {
     let P = this.positions;
     if (!P || P.length === 0) return null;
@@ -302,7 +323,7 @@ class Scene0 {
     let scaleY = (this.captureHeight !== 0)
       ? this.videoHeight / this.captureHeight
       : 1;
-
+//get a stabler value
     let avg = (arr) => {
       let sx = 0, sy = 0, n = 0;
       for (let i of arr) {
@@ -334,7 +355,7 @@ class Scene0 {
 
     let moveU = this.glassesOffset;
     stroke(col.r, col.g, col.b);
-    strokeWeight(4);
+    strokeWeight(5);
     line(
       L.x + v.x * r,
       L.y + v.y * r - moveU,
@@ -348,7 +369,7 @@ class Scene0 {
     noFill();
     stroke(col.r, col.g, col.b);
     strokeWeight(6);
-    circle(x, y - moveU, r * 2);
+    circle(x, y - moveU, r * 1.92);
   }
 
   rerollTarget() {
@@ -375,7 +396,7 @@ class Scene0 {
       db: abs(c.b - target.b),
     };
   }
-
+//avoid resubmit
   keyPressed() {
     if (this.submitted) {
       return;
@@ -387,6 +408,7 @@ class Scene0 {
     }
 
     let d = this.diffsRGB(this.target);
+    //all value are close to targeted value
     let pass =
       (d.dr <= this.range &&
        d.dg <= this.range &&
@@ -396,7 +418,7 @@ class Scene0 {
       this.submitted = true;
     }
   }
-
+//location for sliders
   updateSliderPositions() {
     if (!this.sliders || this.sliders.length === 0) return;
     let cx = width / 2;
@@ -414,6 +436,7 @@ class Scene0 {
   updateVideoSize() {
     if (!this.video) return;
     this.video.size(this.captureWidth, this.captureHeight);
+    //work as "margin" for sliders and texts below webcam video
     let reserved = 260;
     let available = height - reserved;
     if (available < 140) available = 140;

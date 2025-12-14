@@ -1,5 +1,6 @@
 class LeftBubble {
   constructor() {
+    
     this.visible = true;
     this.frames = leftFrames;
     this.idx = 0;
@@ -7,7 +8,7 @@ class LeftBubble {
 
   show() { this.visible = true; }
   hide() { this.visible = false; }
-
+//get my images in the array for photo
   nextFrame() {
     if (!this.frames || this.frames.length === 0) return;
     this.idx = (this.idx + 1) % this.frames.length;
@@ -152,7 +153,7 @@ class Scene1 {
       }
     });
   }
-
+//reset scene state = so everytime when user enter this scene will not see the previous chat history
   start() {
     this.input.value('');
     this.lastSentText = "";
@@ -168,7 +169,7 @@ class Scene1 {
 
     setTimeout(() => this.input.elt.focus(), 20);
   }
-
+//clenup when leave 
   reset() {
     this.message = '';
     this.lastSentText = "";
@@ -240,23 +241,41 @@ class Scene1 {
       bubbleText = this.lastSentText;
     }
 
-    const bubbleScale = 1.1;
-    const baseMinX = 60;
-    const baseMaxX = 532;
-    const baseMinY = 100;
-    const baseMaxY = 192;
-    const baseCenterX = (baseMinX + baseMaxX) / 2;
-    const baseCenterY = (baseMinY + baseMaxY) / 2;
-    const offsetX = width / 2 - baseCenterX * bubbleScale;
-    const offsetY = height / 2 - baseCenterY * bubbleScale;
-
+    let bubbleScale = 1.1;
+   let baseMinX = 60;
+    let baseMaxX = 532;
+    let baseMinY = 100;
+    let baseMaxY = 192;
+   let baseCenterX = (baseMinX + baseMaxX) / 2;
+    let baseCenterY = (baseMinY + baseMaxY) / 2;
+   let offsetX = width / 2 - baseCenterX * bubbleScale;
+   let offsetY = height / 2 - baseCenterY * bubbleScale;
+//where r u leftbubble
     this.leftBubble.display(bubbleScale, offsetX, offsetY);
     this.rightBubble.display(bubbleText, bubbleScale, offsetX, offsetY);
     this.blurLayer.display();
+
+  noCursor();
+
+if (cursorImg) {
+  // flip if move to the left
+  // cause i want to get some screem shots using my cursor to "circle" the headshot
+  if (mouseX >= 0 && mouseX <= width / 2 - 60) {
     push();
-    imageMode(CENTER);
-    if (cursor) image(cursorImg, mouseX, mouseY, 60, 60);
+    imageMode(CENTER);           
+    translate(mouseX, mouseY - 70);
+    scale(-1, 1);                
+    image(cursorImg, 0, 0, 100, 100);
     pop();
+  } else {
+    
+    push();
+    imageMode(CORNER);
+    image(cursorImg, mouseX, mouseY - 70, 100, 100);
+    pop();
+  }
+}
+
 
     if (!this.hasBeenActivated) {
       this.show();
@@ -267,17 +286,24 @@ class Scene1 {
    
 
     if (this.message) {
-      fill(50);
+      push()
+      fill(0);
+      strokeWeight(4);
       textSize(40);
       textAlign(CENTER, CENTER);
       textFont("Kirang Haerang");
       text(this.message, width / 2, height / 2);
+      pop()
 
       if (this.message === 'We can go out!') {
+        push()
+        stroke(0);
+        strokeWeight(5)
         fill(255);
-        textSize(30);
+        textSize(40);
         textAlign(CENTER, TOP);
         text('Press 1 to go to see the movie', width / 2, height / 2 + 48);
+        pop()
       }
     }
 

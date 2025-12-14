@@ -3,8 +3,8 @@ class Scene2 {
     // sizing individually
     this.herHandW = 160;
     this.herHandH = 130;
-    this.myHandW  = 150;
-    this.myHandH  = 120;
+    this.myHandW = 150;
+    this.myHandH = 120;
 
     // hand position
     this.herX = width / 2;
@@ -29,7 +29,7 @@ class Scene2 {
     this.herX = random(herBounds.left, herBounds.right);
     this.herY = random(herBounds.top, herBounds.bottom);
 
-    // reset 
+    // reset
     this.progress = 0;
     this.handHoldShow = false;
     this.bothHandsShow = true;
@@ -72,21 +72,47 @@ class Scene2 {
 
     fill(60);
     textAlign(CENTER, BOTTOM);
-    textSize(12);
+    textSize(24);
     text(label, x + w / 2, y - 6);
   }
 
   display() {
     // background
+    // background location
+    let frameX = 0; // margin left
+    let frameY = 50; // margin top
+    let frameW = width; 
+    let frameH = height - 120; 
+
+    // white background
+    push();
+    noStroke();
+    fill(255);
+    rect(frameX, frameY, frameW, frameH);
+    pop();
+
+    // put movieb into the white frame 
     push();
     tint(255, 180);
-    let bgW = width;
-    let bgH = bgW * (320 / 600);
-    if (bgH > height - 120) {
-      bgH = height - 120;
-      bgW = bgH * (600 / 320);
+
+    let imgAspect = 700 / 300;
+    let frameAspect = frameW / frameH;
+
+    let bgW, bgH;
+    if (frameAspect > imgAspect) {
+      // fillll
+      bgH = frameH;
+      bgW = bgH * imgAspect;
+    } else {
+      // fill
+      bgW = frameW;
+      bgH = bgW / imgAspect;
     }
-    image(movieB, (width - bgW) / 2, 50, bgW, bgH);
+
+    // set position
+    let drawX = frameX + (frameW - bgW) / 2;
+    let drawY = frameY + (frameH - bgH) / 2;
+    image(movieB, drawX, drawY, bgW, bgH);
     pop();
 
     // title
@@ -114,15 +140,18 @@ class Scene2 {
     let d = dist(mX, mY, this.herX, this.herY);
 
     // movement logic (before holding)
+    //if distance is bigger than my value then her hand will move toward my hand
+    //but if i move too fast or get too close, her hand will move away from my
+    //when distance is under my value then process number will grow
     if (!this.locked) {
       if (d < 120 && d > 0.001) {
         let range = map(d, 0, 120, 5, 0);
-        this.herX += (this.herX - mX) / d * range;
-        this.herY += (this.herY - mY) / d * range;
+        this.herX += ((this.herX - mX) / d) * range;
+        this.herY += ((this.herY - mY) / d) * range;
       } else if (d > 180) {
         let pull = map(d, 180, 300, 0, 1.5, true);
-        this.herX += (mX - this.herX) / d * pull;
-        this.herY += (mY - this.herY) / d * pull;
+        this.herX += ((mX - this.herX) / d) * pull;
+        this.herY += ((mY - this.herY) / d) * pull;
       }
     }
 
@@ -133,20 +162,27 @@ class Scene2 {
     // both hands visible
     if (this.bothHandsShow) {
       image(imgHer, this.herX, this.herY, this.herHandW, this.herHandH);
-      image(imgMe,  mX,    mY,    this.myHandW, this.myHandH);
+      image(imgMe, mX, mY, this.myHandW, this.myHandH);
     }
 
     // progress
     if (!this.locked) {
-      if (d < 100) this.progress += 0.15;
-      else         this.progress -= 0.15;
+      if (d < 100) this.progress += 0.25;
+      else this.progress -= 0.15;
 
       this.progress = constrain(this.progress, 0, 100);
 
       if (this.progress < 100) {
         let meterWidth = min(width - 60, 400);
         let meterX = width / 2 - meterWidth / 2;
-        this.drawMeter(meterX, height - 28, meterWidth, 14, this.progress / 100, "Progress");
+        this.drawMeter(
+          meterX,
+          height - 28,
+          meterWidth,
+          14,
+          this.progress / 100,
+          "Progress"
+        );
       } else {
         fill(50);
         textSize(14);
@@ -157,23 +193,22 @@ class Scene2 {
 
     // holding hands
     if (this.locked && this.handHoldShow) {
-     image(
-    imgHold,
-    0,          // set in the middle
-   0,         // set in the middle
-    this.herHandW * 4,  // image sized of the hand
-    this.herHandH * 4
-  );
+      image(
+        imgHold,
+        20, // set in the middle
+        0, // set in the middle
+        this.herHandW * 8, // image sized of the hand
+        this.herHandH * 9
+      );
 
- 
-      push()
+      push();
       stroke(255);
       strokeWeight(5);
-      fill(255,8,90);
-        textSize(60);
-        textAlign(CENTER, TOP);
-        text("hand hold!", width / 2, height - 330);
-pop()
+      fill(255, 8, 90);
+      textSize(80);
+      textAlign(CENTER, TOP);
+      text("hand hold!", width / 2, height - 360);
+      pop();
       if (this.showContinue) {
         fill(50);
         textSize(16);
@@ -236,10 +271,18 @@ pop()
     if (this.locked) {
       let mouseBounds = this.getMouseBounds();
       if (this.lockMX !== null) {
-        this.lockMX = constrain(this.lockMX, mouseBounds.left, mouseBounds.right);
+        this.lockMX = constrain(
+          this.lockMX,
+          mouseBounds.left,
+          mouseBounds.right
+        );
       }
       if (this.lockMY !== null) {
-        this.lockMY = constrain(this.lockMY, mouseBounds.top, mouseBounds.bottom);
+        this.lockMY = constrain(
+          this.lockMY,
+          mouseBounds.top,
+          mouseBounds.bottom
+        );
       }
     }
   }

@@ -10,7 +10,7 @@ class Scene3 {
 
     this.score = 0;
     this.misses = 0;
-    this.message = "Click the lip when it flashes red!";
+    this.message = "Click to kiss when it flashes red!";
     this.messageTimer = millis() + 5000;
 
     this.isKissing = false;
@@ -37,13 +37,14 @@ class Scene3 {
     this.scheduleNextFlash();
   }
 
+  //the math behind flashing time
   scheduleNextFlash() {
     let randomDelay = random(1500, 4500);
     this.nextFlashTime = millis() + randomDelay;
     this.flashEndTime = this.nextFlashTime + 800;
     this.hasClicked = false;
   }
-
+  //end sequence= fade screen and then the text
   update() {
     if (this.gameOver) {
       if (this.fadeAlpha < 255) {
@@ -75,7 +76,7 @@ class Scene3 {
 
     if (this.isKissing) {
       this.kissProgress += this.kissSpeed;
-
+      //kissing animation = flying mouth
       this.kiss1X = lerp(-100, width / 2 - 50, this.kissProgress);
       this.kiss2X = lerp(width + 100, width / 2 + 50, this.kissProgress);
 
@@ -109,7 +110,7 @@ class Scene3 {
         this.gameOver = true;
         this.isWin = false;
 
-        // 输掉时停止音乐
+        // stop music when lose the game...
         if (bgS && bgS.isPlaying()) {
           bgS.stop();
         }
@@ -194,8 +195,7 @@ class Scene3 {
       noCursor();
       return;
     }
-
-    // 还在等你点击嘴唇的状态
+    //waiting for user mouse input
     push();
     imageMode(CENTER);
     if (this.isFlashing) {
@@ -242,12 +242,13 @@ class Scene3 {
         if (this.score >= 5) {
           this.gameOver = true;
           this.isWin = true;
-          // 赢的时候不关音乐
+          // music on when play and win
         } else {
           this.isKissing = true;
           this.kissProgress = 0;
         }
       } else {
+        //early will count as miss and show text
         this.misses++;
         this.message = "Too early! No one wants to kiss now";
         this.messageTimer = millis() + 1500;
@@ -267,7 +268,7 @@ class Scene3 {
 
   isClicked(mx, my) {
     let d = dist(mx, my, this.x, this.y);
-    return d < this.radius;
+    return d < this.radius * 2;
   }
 
   keyPressed() {
@@ -276,10 +277,10 @@ class Scene3 {
       this.showReturnText &&
       (key === "Enter" || keyCode === ENTER)
     ) {
-      // 回到第一幕，调用全局 switchScene
+      // back to scene one to restart
       switchScene(0);
 
-      // 自己的状态也清理一下
+      // cleanup
       this.score = 0;
       this.misses = 0;
       this.gameOver = false;
