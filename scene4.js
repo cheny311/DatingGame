@@ -1,31 +1,30 @@
-
 class Scene4 {
   constructor() {
     this.userImg = null;
-
-    // Image transform (unlimited in scale)
+    
+    // Image transform (unlimited scaling)
     this.userImgW = 400;
     this.userImgH = 400;
     this.userImgRotation = 0;
     this.userImgFlipped = false;
-
+    
     // Move inside frame (offset relative to frame center)
     this.imgOffsetX = 0;
     this.imgOffsetY = 0;
-
+    
     // Drag state
     this.dragging = false;
     this.dragStartOffX = 0;
     this.dragStartOffY = 0;
-
+    
     // Webcam
     this.video = null;
     this.usingCamera = false;
-
+    
     // Marry frames
     this.currentFrameIndex = 0;
-
-   //interaction elements
+    
+    // UI elements
     this.fileInput = null;
     this.saveBtn = null;
     this.camBtn = null;
@@ -35,27 +34,24 @@ class Scene4 {
     this.rotateLeftBtn = null;
     this.rotateRightBtn = null;
     this.backBtn = null;
-
     this.widthSlider = null;
     this.heightSlider = null;
     this.rotationSlider = null;
-
+    this.xPosSlider = null;
+    this.yPosSlider = null;
     this.widthLabelEl = null;
     this.heightLabelEl = null;
     this.rotationLabelEl = null;
-
-  
+    this.xPosLabelEl = null;
+    this.yPosLabelEl = null;
+    
     this.frameBounds = { x: 0, y: 0, width: 800, height: 500 };
-
-   
     this.uiExtras = [];
-
     this.stylesInjected = false;
     this.bgColor = [248, 246, 236];
-
-  
-    this.MARRY_SCALE = 0.8; // marry images shrink to 80%
-    this.MARRY_DOWN = 200;  // move down 200
+    
+    this.MARRY_SCALE = 0.8;
+    this.MARRY_DOWN = 200;
   }
 
   start() {
@@ -64,19 +60,27 @@ class Scene4 {
       this.video.size(320, 240);
       this.video.hide();
     }
-
     this.createUI();
-
-    if (!this.stylesInjected) {
-      this.addCustomStyles();
-      this.stylesInjected = true;
-    }
   }
 
   reset() {
     this.removeUI();
     this.usingCamera = false;
     this.dragging = false;
+    
+    // Reset image state
+    this.userImg = null;
+    this.userImgW = 400;
+    this.userImgH = 400;
+    this.userImgRotation = 0;
+    this.userImgFlipped = false;
+    this.imgOffsetX = 0;
+    this.imgOffsetY = 0;
+    this.currentFrameIndex = 0;
+    
+    if (this.video) {
+      this.video.hide();
+    }
   }
 
   update() {}
@@ -85,77 +89,66 @@ class Scene4 {
     this.display();
   }
 
-display() {
-  background(this.bgColor[0], this.bgColor[1], this.bgColor[2]);
-
-  this.drawControlPanel();  // background
-  this.drawUserPhoto();     // user input
-  this.drawMarryFrame();    // marry photos
-  this.drawTopFrame();      // jiehun
-
-  this.drawUI();
-  this.drawCameraPreview();
-}
+  display() {
+    background(this.bgColor[0], this.bgColor[1], this.bgColor[2]);
+    this.drawControlPanel();
+    this.drawUserPhoto();
+    this.drawMarryFrame();
+    this.drawTopFrame();
+    this.drawUI();
+    this.drawCameraPreview();
+    
+    noCursor();
+    push();
+    imageMode(CORNER);
+    image(cursorImg, mouseX, mouseY - 40, 80, 80);
+    pop();
+  }
 
   drawMarryFrame() {
     if (!Array.isArray(wemarryFrames) || wemarryFrames.length === 0) return;
-
-    let  frame = wemarryFrames[this.currentFrameIndex];
+    let frame = wemarryFrames[this.currentFrameIndex];
     if (!frame) return;
 
-    let  SCALE = this.MARRY_SCALE;
-   let DOWN = this.MARRY_DOWN;
+    let SCALE = this.MARRY_SCALE;
+    let DOWN = this.MARRY_DOWN;
 
     push();
     imageMode(CORNER);
-
-    // Base area for marry content (upper region)
-    let  baseW = width;
-    let  baseH = min(600, height * 0.6);
-
-    let  targetW = baseW * SCALE;
-    let  targetH = baseH * SCALE;
-
-   
-    let  s = min(targetW / frame.width, targetH / frame.height);
-    let  drawW = frame.width * s;
+    
+    let baseW = width;
+    let baseH = min(600, height * 0.6);
+    let targetW = baseW * SCALE;
+    let targetH = baseH * SCALE;
+    let s = min(targetW / frame.width, targetH / frame.height);
+    let drawW = frame.width * s;
     let drawH = frame.height * s;
-
-    let  drawX = (width - drawW) / 2;
-    let  drawY = (baseH - drawH) / 2 + DOWN;
+    let drawX = (width - drawW) / 2;
+    let drawY = (baseH - drawH) / 2 + DOWN;
 
     image(frame, drawX, drawY, drawW, drawH);
-
     this.frameBounds = { x: drawX, y: drawY, width: drawW, height: drawH };
     pop();
   }
 
   constrainImageOffset(frameW, frameH) {
-    let  imgW = this.userImgW * 0.92;
-    let  imgH = this.userImgH * 0.92;
-
-
-    let  maxX = Math.max(0, (imgW - frameW) / 2);
-    let  maxY = Math.max(0, (imgH - frameH) / 2);
-
+    let imgW = this.userImgW * 0.92;
+    let imgH = this.userImgH * 0.92;
+    let maxX = Math.max(0, (imgW - frameW) / 2);
+    let maxY = Math.max(0, (imgH - frameH) / 2);
     this.imgOffsetX = constrain(this.imgOffsetX, -maxX, maxX);
     this.imgOffsetY = constrain(this.imgOffsetY, -maxY, maxY);
   }
 
-
   drawUserPhoto() {
     if (!this.userImg || !this.frameBounds) return;
 
-    let  bx = this.frameBounds.x;
-    let  by = this.frameBounds.y;
-    let  bw = this.frameBounds.width;
-    let  bh = this.frameBounds.height;
-
-    let  cx = bx + bw / 2;
-    let  cy = by + bh / 2;
-
-  
-    this.constrainImageOffset(bw, bh);
+    let bx = this.frameBounds.x;
+    let by = this.frameBounds.y;
+    let bw = this.frameBounds.width;
+    let bh = this.frameBounds.height;
+    let cx = bx + bw / 2;
+    let cy = by + bh / 2;
 
     push();
     translate(cx, cy);
@@ -179,15 +172,12 @@ display() {
     translate(this.imgOffsetX, this.imgOffsetY);
     rotate(radians(this.userImgRotation));
     if (this.userImgFlipped) scale(-1, 1);
-
     image(this.userImg, 0, 0, this.userImgW * 0.92, this.userImgH * 0.92);
     pop();
 
     drawingContext.restore();
-
     pop();
   }
-
 
   drawTopFrame() {
     if (!jiehunFrame) return;
@@ -197,7 +187,6 @@ display() {
     pop();
   }
 
- 
   drawUI() {
     fill(255, 245, 230);
     stroke(255, 170, 90);
@@ -219,15 +208,14 @@ display() {
     textSize(12);
     textStyle(NORMAL);
     text(
-      "Shortcuts: ← → frames | Q/E rotate | F flip | +/- zoom | Wheel zoom",
+      "Shortcuts: Shift+← → change frames | ← → ↑ ↓ move image  | Q/E rotate | F flip | +/- zoom | Wheel zoom",
       width / 2,
       820
     );
   }
 
- 
   drawControlPanel() {
-    let  PANEL_Y = max(470, height - 360);
+    let PANEL_Y = max(470, height - 360);
     push();
     fill(this.bgColor[0], this.bgColor[1], this.bgColor[2]);
     noStroke();
@@ -236,15 +224,14 @@ display() {
     pop();
   }
 
-//preview
   drawCameraPreview() {
     if (!this.video || !this.usingCamera) return;
 
     push();
-    let  previewW = 200;
-    let  previewH = 150;
-    let  previewX = width - previewW - 80;
-    let  previewY = 500 - previewH - 40;
+    let previewW = 200;
+    let previewH = 150;
+    let previewX = width - previewW - 80;
+    let previewY = 500 - previewH - 40;
 
     fill(0);
     stroke(255, 200, 80);
@@ -270,12 +257,11 @@ display() {
   createUI() {
     if (this.fileInput) return;
 
-    let  panelTop = max(50, height - 560);
-    let  startX = 80;
+    let panelTop = max(50, height - 560);
+    let startX = 80;
     let currentY = panelTop;
-
-    let  metrics = this.computeButtonMetrics();
-    let  {
+    let metrics = this.computeButtonMetrics();
+    let {
       buttonWidth,
       buttonHeight,
       rowSpacing,
@@ -285,7 +271,7 @@ display() {
       quickRowGap,
     } = metrics;
 
-    let  instructions = createDiv("Upload or capture a photo")
+    let instructions = createDiv("Upload or capture a photo")
       .position(startX, currentY)
       .class("section-title");
     instructions.style("font-size", "18px");
@@ -313,9 +299,7 @@ display() {
     this.setButtonSize(this.snapBtn, buttonWidth, buttonHeight);
     currentY += buttonHeight + 30;
 
-    let  quickLabel = createDiv("Quick Actions")
-      .position(startX, currentY)
-      .class("section-title");
+    let quickLabel = createDiv("Quick Actions").position(startX, currentY).class("section-title");
     this.uiExtras.push(quickLabel);
     currentY += 30;
 
@@ -331,7 +315,7 @@ display() {
     this.rotateRightBtn.class("control-btn quick-btn");
     this.setButtonSize(this.rotateRightBtn, quickButtonWidth, quickButtonHeight);
 
-    let  quickSecondRowY = currentY + quickButtonHeight + quickRowGap;
+    let quickSecondRowY = currentY + quickButtonHeight + quickRowGap;
 
     this.flipBtn = createButton("Flip");
     this.flipBtn.position(startX, quickSecondRowY);
@@ -344,11 +328,10 @@ display() {
     this.resetBtn.mousePressed(() => this.resetPosition());
     this.resetBtn.class("control-btn quick-btn");
     this.setButtonSize(this.resetBtn, quickButtonWidth, quickButtonHeight);
+
     currentY = quickSecondRowY + quickButtonHeight + 30;
 
-    let  adjustLabel = createDiv("Fine Tuning")
-      .position(startX, currentY)
-      .class("section-title");
+    let adjustLabel = createDiv("Fine Tuning").position(startX, currentY).class("section-title");
     this.uiExtras.push(adjustLabel);
     currentY += 30;
 
@@ -357,7 +340,6 @@ display() {
       .class("slider-label");
     currentY += 20;
 
-    // Slider can still have a max, but it won't limit your wheel/keys scaling
     this.widthSlider = createSlider(80, 6000, this.userImgW, 10);
     this.widthSlider.position(startX, currentY);
     this.widthSlider.class("control-slider");
@@ -387,31 +369,50 @@ display() {
       this.userImgRotation = this.rotationSlider.value();
       this.updateRotationLabel();
     });
-  currentY += 60;
+    currentY += 60;
 
+    this.xPosLabelEl = createElement("div", `X Position: ${this.imgOffsetX}px`)
+      .position(startX, currentY)
+      .class("slider-label");
+    currentY += 20;
 
-let backBtnX = width - buttonWidth - 40;
-let backBtnY = height - buttonHeight - 80;
+    this.xPosSlider = createSlider(-2000, 2000, this.imgOffsetX, 5);
+    this.xPosSlider.position(startX, currentY);
+    this.xPosSlider.class("control-slider");
+    this.xPosSlider.input(() => this.handleXPosSlider());
+    currentY += 40;
 
+    this.yPosLabelEl = createElement("div", `Y Position: ${this.imgOffsetY}px`)
+      .position(startX, currentY)
+      .class("slider-label");
+    currentY += 20;
 
-let saveBtnX = backBtnX - 50;
-let saveBtnY = backBtnY - 20 - (buttonHeight + 14);
+    this.yPosSlider = createSlider(-2000, 2000, this.imgOffsetY, 5);
+    this.yPosSlider.position(startX, currentY);
+    this.yPosSlider.class("control-slider");
+    this.yPosSlider.input(() => this.handleYPosSlider());
+    currentY += 60;
 
-this.saveBtn = createButton("Save Photo");
-this.saveBtn.position(saveBtnX, saveBtnY);
-this.saveBtn.mousePressed(() => saveCanvas("our_wedding_photo", "png"));
-this.saveBtn.class("control-btn save");
-this.setButtonSize(this.saveBtn, buttonWidth, buttonHeight);
+    let backBtnX = width - buttonWidth - 40;
+    let backBtnY = height - buttonHeight - 80;
+    let saveBtnX = backBtnX - 50;
+    let saveBtnY = backBtnY - 20 - (buttonHeight + 14);
 
-this.backBtn = createButton("Back to Start");
-this.backBtn.position(backBtnX - 50, backBtnY - 20);
-this.backBtn.mousePressed(() => switchScene(0));
-this.backBtn.class("control-btn secondary");
-this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
+    this.saveBtn = createButton("Save Photo");
+    this.saveBtn.position(saveBtnX, saveBtnY);
+    this.saveBtn.mousePressed(() => saveCanvas("our_wedding_photo", "png"));
+    this.saveBtn.class("control-btn save");
+    this.setButtonSize(this.saveBtn, buttonWidth, buttonHeight);
+
+    this.backBtn = createButton("Back to Start");
+    this.backBtn.position(backBtnX - 50, backBtnY - 20);
+    this.backBtn.mousePressed(() => switchScene(0));
+    this.backBtn.class("control-btn secondary");
+    this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
   }
 
   removeUI() {
-    let  els = [
+    let els = [
       this.fileInput,
       this.saveBtn,
       this.camBtn,
@@ -424,20 +425,22 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
       this.widthSlider,
       this.heightSlider,
       this.rotationSlider,
+      this.xPosSlider,
+      this.yPosSlider,
       this.widthLabelEl,
       this.heightLabelEl,
       this.rotationLabelEl,
+      this.xPosLabelEl,
+      this.yPosLabelEl,
     ];
-
     for (let el of els) {
       if (el) el.remove();
     }
-
     for (let el of this.uiExtras) {
       if (el) el.remove();
     }
     this.uiExtras = [];
-
+    
     this.fileInput = null;
     this.saveBtn = null;
     this.camBtn = null;
@@ -450,11 +453,14 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
     this.widthSlider = null;
     this.heightSlider = null;
     this.rotationSlider = null;
+    this.xPosSlider = null;
+    this.yPosSlider = null;
     this.widthLabelEl = null;
     this.heightLabelEl = null;
     this.rotationLabelEl = null;
+    this.xPosLabelEl = null;
+    this.yPosLabelEl = null;
   }
-
 
   handleFile(file) {
     if (file && file.type === "image") {
@@ -473,50 +479,46 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
 
   takePhoto() {
     if (!this.video) return;
-
-    let  capturedImg = this.video.get();
-    let  flipped = createGraphics(capturedImg.width, capturedImg.height);
-
+    let capturedImg = this.video.get();
+    let flipped = createGraphics(capturedImg.width, capturedImg.height);
     flipped.push();
     flipped.translate(capturedImg.width, 0);
     flipped.scale(-1, 1);
     flipped.image(capturedImg, 0, 0);
     flipped.pop();
-
     this.userImg = flipped;
     this.imgOffsetX = 0;
     this.imgOffsetY = 0;
-
     this.usingCamera = false;
     if (this.snapBtn) this.snapBtn.hide();
   }
-
 
   resetPosition() {
     this.userImgW = 400;
     this.userImgH = 400;
     this.userImgRotation = 0;
     this.userImgFlipped = false;
-
     this.imgOffsetX = 0;
     this.imgOffsetY = 0;
 
     if (this.widthSlider) this.widthSlider.value(this.userImgW);
     if (this.heightSlider) this.heightSlider.value(this.userImgH);
     if (this.rotationSlider) this.rotationSlider.value(0);
+    if (this.xPosSlider) this.xPosSlider.value(0);
+    if (this.yPosSlider) this.yPosSlider.value(0);
 
     this.updateWidthLabel(this.userImgW);
     this.updateHeightLabel(this.userImgH);
     this.updateRotationLabel();
+    this.updateXPosLabel();
+    this.updateYPosLabel();
   }
 
   rotateImage(deg) {
     if (!this.userImg) return;
-
     this.userImgRotation += deg;
     if (this.userImgRotation > 180) this.userImgRotation -= 360;
     if (this.userImgRotation < -180) this.userImgRotation += 360;
-
     if (this.rotationSlider) this.rotationSlider.value(this.userImgRotation);
     this.updateRotationLabel();
   }
@@ -526,19 +528,16 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
     this.userImgFlipped = !this.userImgFlipped;
   }
 
-
   mousePressed() {
     if (!this.userImg || !this.frameBounds) return;
-
-    let  bx = this.frameBounds.x;
+    let bx = this.frameBounds.x;
     let by = this.frameBounds.y;
-    let  bw = this.frameBounds.width;
-    let  bh = this.frameBounds.height;
+    let bw = this.frameBounds.width;
+    let bh = this.frameBounds.height;
 
     if (mouseX >= bx && mouseX <= bx + bw && mouseY >= by && mouseY <= by + bh) {
-      let  cx = bx + bw / 2;
-      let  cy = by + bh / 2;
-
+      let cx = bx + bw / 2;
+      let cy = by + bh / 2;
       this.dragging = true;
       this.dragStartOffX = this.imgOffsetX - (mouseX - cx);
       this.dragStartOffY = this.imgOffsetY - (mouseY - cy);
@@ -547,14 +546,21 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
 
   mouseDragged() {
     if (!this.dragging || !this.frameBounds) return;
+    let cx = this.frameBounds.x + this.frameBounds.width / 2;
+    let cy = this.frameBounds.y + this.frameBounds.height / 2;
 
-    let  cx = this.frameBounds.x + this.frameBounds.width / 2;
-    let  cy = this.frameBounds.y + this.frameBounds.height / 2;
+    this.imgOffsetX = mouseX - cx + this.dragStartOffX;
+    this.imgOffsetY = mouseY - cy + this.dragStartOffY;
 
-    this.imgOffsetX = (mouseX - cx) + this.dragStartOffX;
-    this.imgOffsetY = (mouseY - cy) + this.dragStartOffY;
+    if (this.xPosSlider) {
+      this.xPosSlider.value(this.imgOffsetX);
+    }
+    if (this.yPosSlider) {
+      this.yPosSlider.value(this.imgOffsetY);
+    }
 
-    this.constrainImageOffset(this.frameBounds.width, this.frameBounds.height);
+    this.updateXPosLabel();
+    this.updateYPosLabel();
   }
 
   mouseReleased() {
@@ -563,59 +569,89 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
 
   mouseWheel(event) {
     if (!this.userImg) return;
-
-    let  zoomFactor = event.delta > 0 ? 0.95 : 1.05;
+    
+    let zoomFactor = event.delta > 0 ? 0.95 : 1.05;
+    
+    // Allow unlimited scaling
     this.userImgW *= zoomFactor;
     this.userImgH *= zoomFactor;
-
-  
+    
+    // Update sliders only if within their range
+    if (this.widthSlider) {
+      this.widthSlider.value(constrain(this.userImgW, 80, 6000));
+    }
+    if (this.heightSlider) {
+      this.heightSlider.value(constrain(this.userImgH, 80, 6000));
+    }
+    
+    // Always update labels with actual values (not constrained)
+    this.updateWidthLabel(this.userImgW);
+    this.updateHeightLabel(this.userImgH);
+    
     if (this.frameBounds) {
       this.constrainImageOffset(this.frameBounds.width, this.frameBounds.height);
     }
-
-    if (this.widthSlider) this.widthSlider.value(constrain(this.userImgW, 80, 6000));
-    if (this.heightSlider) this.heightSlider.value(constrain(this.userImgH, 80, 6000));
-    this.updateWidthLabel();
-    this.updateHeightLabel();
-
+    
     return false;
   }
 
-
   keyPressed() {
-    if (keyCode === RIGHT_ARROW) {
+    // Frame switching: Shift + Arrow Keys
+    if (keyCode === RIGHT_ARROW && keyIsDown(SHIFT)) {
       this.currentFrameIndex = (this.currentFrameIndex + 1) % WEMARRY_COUNT;
-    } else if (keyCode === LEFT_ARROW) {
+      return;
+    } else if (keyCode === LEFT_ARROW && keyIsDown(SHIFT)) {
       this.currentFrameIndex = (this.currentFrameIndex - 1 + WEMARRY_COUNT) % WEMARRY_COUNT;
+      return;
     }
 
- 
-
-    if (this.frameBounds) {
-      this.constrainImageOffset(this.frameBounds.width, this.frameBounds.height);
+    // Move user photo with Arrow Keys (without Shift)
+    if (this.userImg && this.frameBounds && !keyIsDown(SHIFT)) {
+      let step = keyIsDown(CONTROL) ? 30 : 10;
+      
+      if (keyCode === LEFT_ARROW) {
+        this.imgOffsetX -= step;
+        if (this.xPosSlider) this.xPosSlider.value(this.imgOffsetX);
+        this.updateXPosLabel();
+      }
+      if (keyCode === RIGHT_ARROW) {
+        this.imgOffsetX += step;
+        if (this.xPosSlider) this.xPosSlider.value(this.imgOffsetX);
+        this.updateXPosLabel();
+      }
+      if (keyCode === UP_ARROW) {
+        this.imgOffsetY -= step;
+        if (this.yPosSlider) this.yPosSlider.value(this.imgOffsetY);
+        this.updateYPosLabel();
+      }
+      if (keyCode === DOWN_ARROW) {
+        this.imgOffsetY += step;
+        if (this.yPosSlider) this.yPosSlider.value(this.imgOffsetY);
+        this.updateYPosLabel();
+      }
     }
 
+    // Rotate/flip
     if (key === "q" || key === "Q") this.rotateImage(-5);
     else if (key === "e" || key === "E") this.rotateImage(5);
-
     if (key === "f" || key === "F") this.flipImage();
 
-    if (key === "+" || key === "=") {
+    // Zoom (unlimited)
+    if ((key === "+" || key === "=") && this.userImg) {
       this.userImgW *= 1.1;
       this.userImgH *= 1.1;
-    } else if (key === "-" || key === "_") {
+      if (this.widthSlider) this.widthSlider.value(constrain(this.userImgW, 80, 6000));
+      if (this.heightSlider) this.heightSlider.value(constrain(this.userImgH, 80, 6000));
+      this.updateWidthLabel(this.userImgW);
+      this.updateHeightLabel(this.userImgH);
+    } else if ((key === "-" || key === "_") && this.userImg) {
       this.userImgW *= 0.9;
       this.userImgH *= 0.9;
+      if (this.widthSlider) this.widthSlider.value(constrain(this.userImgW, 80, 6000));
+      if (this.heightSlider) this.heightSlider.value(constrain(this.userImgH, 80, 6000));
+      this.updateWidthLabel(this.userImgW);
+      this.updateHeightLabel(this.userImgH);
     }
-
-    if (this.frameBounds) {
-      this.constrainImageOffset(this.frameBounds.width, this.frameBounds.height);
-    }
-
-    if (this.widthSlider) this.widthSlider.value(constrain(this.userImgW, 80, 6000));
-    if (this.heightSlider) this.heightSlider.value(constrain(this.userImgH, 80, 6000));
-    this.updateWidthLabel();
-    this.updateHeightLabel();
   }
 
   handleWidthSlider() {
@@ -636,21 +672,32 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
     this.updateHeightLabel();
   }
 
+  handleXPosSlider() {
+    if (!this.xPosSlider) return;
+    this.imgOffsetX = this.xPosSlider.value();
+    this.updateXPosLabel();
+  }
+
+  handleYPosSlider() {
+    if (!this.yPosSlider) return;
+    this.imgOffsetY = this.yPosSlider.value();
+    this.updateYPosLabel();
+  }
+
   computeButtonMetrics() {
-    let  maxWidth = width * 0.25;
-    let  buttonWidth = Math.min(200, maxWidth);
-    let  buttonHeight = 44;
-    let  rowSpacing = buttonWidth + 20;
-   
-    let  quickButtonWidth = Math.min(Math.max(90, buttonWidth * 0.7), maxWidth);
-    let  quickButtonHeight = Math.max(32, buttonHeight - 10);
-    let  quickSpacing = quickButtonWidth + 16;
-    let  quickRowGap = 12;
+    let maxWidth = width * 0.25;
+    let buttonWidth = Math.min(200, maxWidth);
+    let buttonHeight = 44;
+    let rowSpacing = buttonWidth + 20;
+    let quickButtonWidth = Math.min(Math.max(90, buttonWidth * 0.7), maxWidth);
+    let quickButtonHeight = Math.max(32, buttonHeight - 10);
+    let quickSpacing = quickButtonWidth + 16;
+    let quickRowGap = 12;
+
     return {
       buttonWidth,
       buttonHeight,
       rowSpacing,
-    
       quickButtonWidth,
       quickButtonHeight,
       quickSpacing,
@@ -660,8 +707,8 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
 
   setButtonSize(btn, targetWidth, targetHeight) {
     if (!btn) return;
-    let  maxWidth = width * 0.25;
-    let  clampedWidth = Math.min(targetWidth, maxWidth);
+    let maxWidth = width * 0.25;
+    let clampedWidth = Math.min(targetWidth, maxWidth);
     btn.style("width", clampedWidth + "px");
     btn.style("max-width", maxWidth + "px");
     btn.style("height", targetHeight + "px");
@@ -678,9 +725,15 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
   }
 
   updateRotationLabel() {
-    if (this.rotationLabelEl) this.rotationLabelEl.html("Rotation: " + round(this.userImgRotation) + "°");
+    if (this.rotationLabelEl)
+      this.rotationLabelEl.html("Rotation: " + round(this.userImgRotation) + "°");
   }
 
+  updateXPosLabel() {
+    if (this.xPosLabelEl) this.xPosLabelEl.html("X Position: " + round(this.imgOffsetX) + "px");
+  }
 
-  
+  updateYPosLabel() {
+    if (this.yPosLabelEl) this.yPosLabelEl.html("Y Position: " + round(this.imgOffsetY) + "px");
+  }
 }

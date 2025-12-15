@@ -31,25 +31,22 @@ function preload() {
   lipImg = loadImage("images/lip.png");
   kissImg = loadImage("images/kiss.png");
  
- jiehunFrame = loadImage(
-  "marry/jiehun.png",
-  () => console.log("✓ Loaded marry/jiehun.png"),
-  () => console.warn("✗ Failed to load marry/jiehun.png")
-);
-
+  jiehunFrame = loadImage(
+    "marry/jiehun.png",
+    () => console.log("✓ Loaded marry/jiehun.png"),
+    () => console.warn("✗ Failed to load marry/jiehun.png")
+  );
 
   wemarryFrames = [];
   for (let i = 1; i <= WEMARRY_COUNT; i++) {
     wemarryFrames.push(
       loadImage(
         `marry/wemarry${i}.png`,
-        () => console.log(`✓ Loaded wemarry${i}.gif`),
-        () => console.warn(`✗ Failed wemarry${i}.gif`)
+        () => console.log(`✓ Loaded wemarry${i}.png`),
+        () => console.warn(`✗ Failed wemarry${i}.png`)
       )
     );
   }
-
-
 }
 
 function setup() {
@@ -97,6 +94,7 @@ function switchScene(newScene) {
     scenes[currentScene].start();
   }
 }
+
 function keyPressed() {
   if (scenes[currentScene] && scenes[currentScene].keyPressed) {
     scenes[currentScene].keyPressed();
@@ -114,6 +112,7 @@ function mousePressed() {
     scenes[currentScene].mousePressed();
   }
 }
+
 function mouseDragged() {
   if (scenes[currentScene] && scenes[currentScene].mouseDragged) {
     scenes[currentScene].mouseDragged();
@@ -125,8 +124,10 @@ function mouseReleased() {
     scenes[currentScene].mouseReleased();
   }
 }
-function mouseWheel(event) {
+
+function mouseWheel(e) {
   if (scenes[currentScene] && scenes[currentScene].mouseWheel) {
-    return scenes[currentScene].mouseWheel(event);
+    return scenes[currentScene].mouseWheel(e);
   }
+  return false;
 }
