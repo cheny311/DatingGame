@@ -44,6 +44,7 @@ class Scene3 {
     this.flashEndTime = this.nextFlashTime + 800;
     this.hasClicked = false;
   }
+
   //end sequence= fade screen and then the text
   update() {
     if (this.gameOver) {
@@ -96,11 +97,7 @@ class Scene3 {
       this.isFlashing = true;
     }
 
-    if (
-      this.isFlashing &&
-      !this.hasClicked &&
-      currentTime >= this.flashEndTime
-    ) {
+    if (this.isFlashing && !this.hasClicked && currentTime >= this.flashEndTime) {
       this.isFlashing = false;
       this.misses++;
       this.message = "It is all about timing";
@@ -155,9 +152,10 @@ class Scene3 {
 
         if (this.isWin) {
           text("get home safe", width / 2, height / 2 + 20);
+          text("Press ENTER to take wedding photos", width / 2, height / 2 + 60);
+        } else {
+          text("Press ENTER to take the train", width / 2, height / 2 + 60);
         }
-
-        text("Press ENTER to take the train", width / 2, height / 2 + 60);
       }
 
       return;
@@ -183,6 +181,7 @@ class Scene3 {
       textSize(24);
       textAlign(CENTER);
       text(`Kisses: ${this.score}  |  Misses: ${this.misses}`, width / 2, 50);
+
       push();
       if (this.pauseAfterKiss) {
         stroke(255);
@@ -192,9 +191,11 @@ class Scene3 {
         text("Muah!", width / 2, height / 2);
       }
       pop();
+
       noCursor();
       return;
     }
+
     //waiting for user mouse input
     push();
     imageMode(CENTER);
@@ -239,7 +240,8 @@ class Scene3 {
         this.messageTimer = millis() + 3000;
         this.isFlashing = false;
 
-        if (this.score >= 5) {
+        // if (this.score >= 1) {
+            if (this.score >= 5) {
           this.gameOver = true;
           this.isWin = true;
           // music on when play and win
@@ -277,27 +279,11 @@ class Scene3 {
       this.showReturnText &&
       (key === "Enter" || keyCode === ENTER)
     ) {
-      // back to scene one to restart
-      switchScene(0);
-
-      // cleanup
-      this.score = 0;
-      this.misses = 0;
-      this.gameOver = false;
-      this.fadeAlpha = 0;
-      this.showFinalText = false;
-      this.showReturnText = false;
-      this.isWin = false;
-      this.message = "Click the lip when it flashes red!";
-      this.messageTimer = millis() + 5000;
-      this.isFlashing = false;
-      this.pauseAfterKiss = false;
-      this.isKissing = false;
-      this.kissProgress = 0;
-      this.kiss1X = -100;
-      this.kiss2X = width + 100;
-
-      this.scheduleNextFlash();
+      if (this.isWin) {
+        switchScene(4);
+      } else {
+        switchScene(0);
+      }
     }
   }
 

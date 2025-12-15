@@ -13,3 +13,98 @@ canvas {
   font-weight: 400;
   font-style: normal;
 }
+body {
+  font-family: 'Kirang Haerang', cursive;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  border-radius: 8px;
+}
+
+.section-title {
+  color: #c06930;
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.control-btn {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #f4a259;
+  color: #3f2a1f;
+  border: none;
+  /* padding: 10px 20px; */  /* ✅ CSS 注释要这样写 */
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(244, 162, 89, 0.35);
+  box-sizing: border-box;
+}
+
+.control-btn:hover {
+  transform: translateY(-2px);
+  background: #f28c3c;
+  box-shadow: 0 6px 20px rgba(242, 140, 60, 0.45);
+}
+
+.control-btn.accent {
+  background: #f1be5a;
+  color: #4a300d;
+  box-shadow: 0 4px 15px rgba(241, 190, 90, 0.4);
+}
+
+.control-btn.secondary,
+.control-btn.quick-btn {
+  background: transparent;
+  color: #f28c3c;
+  border: 2px dashed #f28c3c;
+  box-shadow: none;
+}
+
+.control-btn.save {
+  background: transparent;
+  color: #45b7af;
+  font-size: 14px;
+  border: 2px dashed #45b7af;
+  box-shadow: none;
+}
+
+.control-input {
+  font-size: 13px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 2px solid #f4a259;
+  background: white;
+}
+
+.control-slider {
+  width: 160px;
+  height: 6px;
+  border-radius: 5px;
+  outline: none;
+  -webkit-appearance: none;
+  background: #f6c499;
+}
+
+.control-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.slider-label {
+  color: #555;
+  font-size: 13px;
+  font-weight: 500;
+}

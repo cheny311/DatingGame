@@ -10,6 +10,11 @@ let bgS;
 let leftFrames = [];
 let pipImg;
 let bgMusicStarted = false;
+
+let jiehunFrame;            
+let wemarryFrames = [];    
+const WEMARRY_COUNT = 22;
+
 function preload() {
   let names = ["p1", "p2", "p3", "p4", "p5", "p6"];
   for (let n of names) {
@@ -25,6 +30,26 @@ function preload() {
   imgHold = loadImage("images/hold.png");
   lipImg = loadImage("images/lip.png");
   kissImg = loadImage("images/kiss.png");
+ 
+ jiehunFrame = loadImage(
+  "marry/jiehun.png",
+  () => console.log("✓ Loaded marry/jiehun.png"),
+  () => console.warn("✗ Failed to load marry/jiehun.png")
+);
+
+
+  wemarryFrames = [];
+  for (let i = 1; i <= WEMARRY_COUNT; i++) {
+    wemarryFrames.push(
+      loadImage(
+        `marry/wemarry${i}.png`,
+        () => console.log(`✓ Loaded wemarry${i}.gif`),
+        () => console.warn(`✗ Failed wemarry${i}.gif`)
+      )
+    );
+  }
+
+
 }
 
 function setup() {
@@ -35,6 +60,7 @@ function setup() {
   scenes[1] = new Scene1();
   scenes[2] = new Scene2();
   scenes[3] = new Scene3();
+  scenes[4] = new Scene4();
 
   scenes[0].start();
 }
@@ -78,7 +104,7 @@ function keyPressed() {
 
   if (key === "1") {
     let next = currentScene + 1;
-    if (next > 3) next = 0;
+    if (next > 4) next = 0;
     switchScene(next);
   }
 }
@@ -86,5 +112,21 @@ function keyPressed() {
 function mousePressed() {
   if (scenes[currentScene] && scenes[currentScene].mousePressed) {
     scenes[currentScene].mousePressed();
+  }
+}
+function mouseDragged() {
+  if (scenes[currentScene] && scenes[currentScene].mouseDragged) {
+    scenes[currentScene].mouseDragged();
+  }
+}
+
+function mouseReleased() {
+  if (scenes[currentScene] && scenes[currentScene].mouseReleased) {
+    scenes[currentScene].mouseReleased();
+  }
+}
+function mouseWheel(event) {
+  if (scenes[currentScene] && scenes[currentScene].mouseWheel) {
+    return scenes[currentScene].mouseWheel(event);
   }
 }
