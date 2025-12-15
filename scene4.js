@@ -389,11 +389,11 @@ display() {
     });
   currentY += 60;
 
-// ---- bottom-right buttons ----
+
 let backBtnX = width - buttonWidth - 40;
 let backBtnY = height - buttonHeight - 80;
 
-// Save Photo 放在 Back 上面
+
 let saveBtnX = backBtnX - 50;
 let saveBtnY = backBtnY - 20 - (buttonHeight + 14);
 
@@ -455,9 +455,7 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
     this.rotationLabelEl = null;
   }
 
-  // ---------------------------
-  // File upload
-  // ---------------------------
+
   handleFile(file) {
     if (file && file.type === "image") {
       loadImage(file.data, (img) => {
@@ -493,9 +491,7 @@ this.setButtonSize(this.backBtn, buttonWidth, buttonHeight);
     if (this.snapBtn) this.snapBtn.hide();
   }
 
-  // ---------------------------
-  // Transforms
-  // ---------------------------
+
   resetPosition() {
     this.userImgW = 400;
     this.userImgH = 400;
